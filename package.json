@@ -1,0 +1,8 @@
+{
+  "name": "hollow-web",
+  "version": "1.0.0",
+  "description": "hollow — web chat + termux CLI",
+  "dependencies": {
+    "openai": "^4.47.1"
+  }
+}
