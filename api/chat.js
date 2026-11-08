@@ -6,14 +6,20 @@ export default async function handler(req) {
   if (req.method !== 'POST') return new Response('method not allowed', { status: 405 });
 
   let body;
-  try { body = await req.json(); }
-  catch { return new Response('bad json', { status: 400 }); }
+  try { body = await req.json(); } catch { return new Response('bad json', { status: 400 }); }
 
-  const { messages = [], model, system } = body;
+  const {
+    messages = [],
+    model,
+    system,
+    // client-supplied keys override env (for in-app settings)
+    apiKey,
+    baseUrl,
+  } = body;
 
   const client = new OpenAI({
-    baseURL: process.env.HOLLOW_BASE || 'https://api.unrestricted.sh/v1',
-    apiKey:  process.env.HOLLOW_KEY  || '',
+    baseURL: baseUrl  || process.env.HOLLOW_BASE  || 'https://api.unrestricted.sh/v1',
+    apiKey:  apiKey   || process.env.HOLLOW_KEY   || '',
   });
 
   const msgs = system

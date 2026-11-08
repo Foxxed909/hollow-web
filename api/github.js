@@ -7,13 +7,12 @@ export default async function handler(req) {
   if (req.method !== 'POST') return new Response('method not allowed', { status: 405 });
 
   let body;
-  try { body = await req.json(); }
-  catch { return new Response('bad json', { status: 400 }); }
+  try { body = await req.json(); } catch { return new Response('bad json', { status: 400 }); }
 
-  const { path, method = 'GET', payload } = body;
+  const { path, method = 'GET', payload, ghToken } = body;
   if (!path) return Response.json({ error: 'path required' }, { status: 400 });
 
-  const token = process.env.GITHUB_TOKEN;
+  const token = ghToken || process.env.GITHUB_TOKEN || '';
   const headers = { 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 

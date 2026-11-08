@@ -5,248 +5,451 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>hollow</title>
 <style>
-  :root {
-    --bg:      #0d0d0d;
-    --bg2:     #141414;
-    --bg3:     #1a1a1a;
-    --border:  #222;
-    --text:    #e8e8e8;
-    --dim:     #666;
-    --accent:  #7c6af7;
-    --accent2: #5b53c4;
-    --green:   #4ade80;
-    --red:     #f87171;
-    --yellow:  #fbbf24;
-    --code-bg: #111;
-    --radius:  8px;
-    --sidebar: 260px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 13px; overflow: hidden; }
+:root {
+  --bg:      #0d0d0d;
+  --bg2:     #141414;
+  --bg3:     #1c1c1c;
+  --border:  #242424;
+  --text:    #e8e8e8;
+  --dim:     #555;
+  --accent:  #7c6af7;
+  --accent2: #5b53c4;
+  --green:   #4ade80;
+  --nvidia:  #76b900;
+  --red:     #f87171;
+  --yellow:  #fbbf24;
+  --code-bg: #0a0a0a;
+  --radius:  7px;
+  --sidebar: 265px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%; background: var(--bg); color: var(--text);
+  font-family: 'SF Mono','Fira Code','Cascadia Code',monospace;
+  font-size: 13px; overflow: hidden;
+}
 
-  /* ── layout ── */
-  #app { display: flex; height: 100%; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+/* layout */
+#app { display: flex; height: 100%; padding-top: env(safe-area-inset-top,0px); padding-bottom: env(safe-area-inset-bottom,0px); }
 
-  /* ── sidebar ── */
+/* sidebar */
+#sidebar {
+  width: var(--sidebar); min-width: var(--sidebar);
+  background: var(--bg2); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+  transition: transform .2s ease;
+}
+.sb-section { padding: 11px 12px; border-bottom: 1px solid var(--border); }
+.sb-label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); margin-bottom: 7px; }
+select, input[type=text], textarea {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text); padding: 6px 8px; border-radius: var(--radius);
+  font-family: inherit; font-size: 12px; outline: none;
+}
+select:focus, input:focus, textarea:focus { border-color: var(--accent); }
+textarea { resize: vertical; min-height: 54px; max-height: 110px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 5px 10px; border-radius: var(--radius); border: 1px solid var(--border);
+  background: var(--bg3); color: var(--text); cursor: pointer;
+  font-family: inherit; font-size: 12px; transition: background .15s;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--border); }
+.btn.accent { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.accent:hover { background: var(--accent2); }
+.btn.nvidia-btn { background: #0f1a05; border-color: var(--nvidia); color: var(--nvidia); }
+.btn.nvidia-btn:hover { background: #1a2e08; }
+.btn-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+
+/* provider pills */
+#provider-pills { display: flex; gap: 5px; margin-bottom: 8px; }
+.pill {
+  flex: 1; padding: 4px 0; text-align: center; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--bg3);
+  color: var(--dim); cursor: pointer; font-size: 11px; transition: all .15s;
+}
+.pill:hover { border-color: var(--dim); color: var(--text); }
+.pill.active { border-color: var(--accent); color: var(--accent); background: #1a1830; }
+.pill.nvidia.active { border-color: var(--nvidia); color: var(--nvidia); background: #0f1a05; }
+
+/* session list */
+#session-list { max-height: 150px; overflow-y: auto; margin-top: 6px; }
+.session-item {
+  padding: 4px 8px; border-radius: 4px; cursor: pointer;
+  color: var(--dim); font-size: 11px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.session-item:hover { background: var(--bg3); color: var(--text); }
+
+/* gh panel */
+#gh-panel { flex: 1; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+#gh-output {
+  background: var(--code-bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 8px; font-size: 11px;
+  color: var(--green); white-space: pre-wrap;
+  min-height: 56px; max-height: 170px; overflow-y: auto;
+}
+.gh-btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+#gh-input { font-size: 11px; }
+
+/* main */
+#main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* topbar */
+#topbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 13px; border-bottom: 1px solid var(--border);
+  background: var(--bg2); flex-shrink: 0;
+}
+#menu-btn { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 17px; padding: 2px 5px; display: none; }
+#topbar-title { font-weight: bold; color: var(--accent); letter-spacing: .05em; }
+#topbar-provider { font-size: 10px; padding: 2px 7px; border-radius: 20px; border: 1px solid var(--border); color: var(--dim); }
+#topbar-provider.nvidia { border-color: var(--nvidia); color: var(--nvidia); }
+#topbar-model { color: var(--dim); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+#stream-badge {
+  margin-left: auto; font-size: 10px; padding: 2px 7px;
+  border-radius: 20px; border: 1px solid var(--border); color: var(--dim);
+  cursor: pointer; user-select: none;
+}
+#stream-badge.on { border-color: var(--green); color: var(--green); }
+#settings-btn, #clear-btn {
+  background: none; border: none; color: var(--dim); cursor: pointer;
+  font-size: 13px; padding: 4px 7px;
+}
+#settings-btn:hover { color: var(--accent); }
+#clear-btn:hover { color: var(--red); }
+
+/* messages */
+#messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
+.msg { display: flex; gap: 10px; max-width: 100%; }
+.msg.user { flex-direction: row-reverse; }
+.msg-bubble {
+  max-width: 74%; padding: 10px 13px; border-radius: var(--radius);
+  line-height: 1.6; word-break: break-word;
+}
+.user .msg-bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 2px; }
+.assistant .msg-bubble { background: var(--bg3); border: 1px solid var(--border); border-bottom-left-radius: 2px; }
+.msg-avatar {
+  width: 25px; height: 25px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0; margin-top: 3px;
+  background: var(--bg3); border: 1px solid var(--border);
+}
+.user .msg-avatar { background: var(--accent2); border-color: var(--accent); color: #fff; }
+.nvidia-mode .assistant .msg-avatar { border-color: var(--nvidia); color: var(--nvidia); }
+.msg-bubble pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 4px; padding: 8px; overflow-x: auto; margin: 6px 0; font-size: 11px; }
+.msg-bubble code { background: var(--code-bg); padding: 1px 4px; border-radius: 3px; font-size: 11px; }
+.msg-bubble pre code { background: none; padding: 0; }
+.msg.info .msg-bubble { background: none; border: none; color: var(--dim); font-size: 11px; font-style: italic; max-width: 100%; }
+.cursor::after { content: '▋'; animation: blink .7s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* input */
+#input-area {
+  padding: 10px 13px; border-top: 1px solid var(--border);
+  background: var(--bg2); display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0;
+}
+#user-input {
+  flex: 1; resize: none; min-height: 36px; max-height: 140px;
+  overflow-y: auto; padding: 8px 11px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text);
+  font-family: inherit; font-size: 13px; line-height: 1.4; outline: none;
+}
+#user-input:focus { border-color: var(--accent); }
+#send-btn {
+  width: 36px; height: 36px; border-radius: var(--radius);
+  background: var(--accent); border: none; color: #fff;
+  cursor: pointer; font-size: 15px; flex-shrink: 0; transition: background .15s;
+}
+#send-btn:hover { background: var(--accent2); }
+#send-btn:disabled { opacity: .4; cursor: default; }
+
+/* ── settings modal ────────────────────────────────── */
+#settings-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.7); z-index: 100;
+  align-items: center; justify-content: center;
+}
+#settings-overlay.open { display: flex; }
+#settings-modal {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; width: min(460px, 92vw);
+  max-height: 90vh; overflow-y: auto;
+  display: flex; flex-direction: column;
+}
+#settings-modal h2 { font-size: 14px; padding: 14px 16px; border-bottom: 1px solid var(--border); color: var(--accent); }
+.settings-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; }
+.field-group { display: flex; flex-direction: column; gap: 5px; }
+.field-label { font-size: 11px; color: var(--dim); }
+.field-label span { color: var(--text); }
+.field-desc { font-size: 10px; color: var(--dim); margin-top: 2px; }
+.settings-divider { border: none; border-top: 1px solid var(--border); margin: 2px 0; }
+.settings-footer { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+.key-status { font-size: 10px; padding: 2px 7px; border-radius: 20px; display: inline-block; }
+.key-status.set { border: 1px solid var(--green); color: var(--green); }
+.key-status.unset { border: 1px solid var(--dim); color: var(--dim); }
+
+/* nvidia section */
+.nvidia-section { background: #0a1203; border: 1px solid #2a3f10; border-radius: var(--radius); padding: 10px 12px; }
+.nvidia-section .sb-label { color: var(--nvidia); }
+.nvidia-models-list { margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
+.nvidia-model-pill {
+  padding: 4px 8px; border-radius: 4px; cursor: pointer;
+  font-size: 11px; color: #aaa; border: 1px solid transparent;
+  transition: all .1s;
+}
+.nvidia-model-pill:hover { background: #1a2e08; border-color: var(--nvidia); color: var(--nvidia); }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+@media (max-width: 640px) {
+  #menu-btn { display: block; }
   #sidebar {
-    width: var(--sidebar); min-width: var(--sidebar);
-    background: var(--bg2);
-    border-right: 1px solid var(--border);
-    display: flex; flex-direction: column;
-    overflow: hidden;
-    transition: transform .2s ease;
+    position: absolute;
+    height: calc(100% - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+    transform: translateX(calc(-1 * var(--sidebar))); z-index: 50;
   }
-  #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar))); position: absolute; height: 100%; z-index: 50; }
-  .sb-section { padding: 12px; border-bottom: 1px solid var(--border); }
-  .sb-label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); margin-bottom: 8px; }
-  select, input[type=text], textarea {
-    width: 100%; background: var(--bg3); border: 1px solid var(--border);
-    color: var(--text); padding: 6px 8px; border-radius: var(--radius);
-    font-family: inherit; font-size: 12px; outline: none;
-  }
-  select:focus, input:focus, textarea:focus { border-color: var(--accent); }
-  textarea { resize: vertical; min-height: 56px; max-height: 120px; }
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    padding: 5px 10px; border-radius: var(--radius); border: 1px solid var(--border);
-    background: var(--bg3); color: var(--text); cursor: pointer;
-    font-family: inherit; font-size: 12px; transition: background .15s;
-  }
-  .btn:hover { background: var(--border); }
-  .btn.accent { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .btn.accent:hover { background: var(--accent2); }
-  .btn-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
-
-  /* sessions */
-  #session-list { max-height: 160px; overflow-y: auto; margin-top: 6px; }
-  .session-item {
-    padding: 5px 8px; border-radius: 4px; cursor: pointer;
-    color: var(--dim); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .session-item:hover { background: var(--bg3); color: var(--text); }
-
-  /* gh panel */
-  #gh-panel { flex: 1; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
-  #gh-output {
-    background: var(--code-bg); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 8px; font-size: 11px;
-    color: var(--green); white-space: pre-wrap; min-height: 60px;
-    max-height: 180px; overflow-y: auto;
-  }
-  .gh-btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-  #gh-input { font-size: 11px; }
-
-  /* ── main ── */
-  #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-
-  /* topbar */
-  #topbar {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 14px; border-bottom: 1px solid var(--border);
-    background: var(--bg2);
-  }
-  #menu-btn { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 18px; padding: 2px 6px; display: none; }
-  #topbar-title { font-weight: bold; color: var(--accent); letter-spacing: .05em; }
-  #topbar-model { color: var(--dim); font-size: 11px; margin-left: 4px; }
-  #stream-badge {
-    margin-left: auto; font-size: 10px; padding: 2px 7px;
-    border-radius: 20px; border: 1px solid var(--border); color: var(--dim);
-  }
-  #stream-badge.on { border-color: var(--green); color: var(--green); }
-  #clear-btn { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 12px; padding: 4px 8px; }
-  #clear-btn:hover { color: var(--red); }
-
-  /* messages */
-  #messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
-  .msg { display: flex; gap: 10px; max-width: 100%; }
-  .msg.user { flex-direction: row-reverse; }
-  .msg-bubble {
-    max-width: 72%; padding: 10px 13px; border-radius: var(--radius);
-    line-height: 1.55; word-break: break-word;
-  }
-  .user .msg-bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 2px; }
-  .assistant .msg-bubble { background: var(--bg3); border: 1px solid var(--border); border-bottom-left-radius: 2px; }
-  .msg-avatar {
-    width: 26px; height: 26px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; flex-shrink: 0; margin-top: 2px;
-    background: var(--bg3); border: 1px solid var(--border);
-  }
-  .user .msg-avatar { background: var(--accent2); border-color: var(--accent); color: #fff; }
-  /* code inside bubbles */
-  .msg-bubble pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 4px; padding: 8px; overflow-x: auto; margin: 6px 0; font-size: 11px; }
-  .msg-bubble code { background: var(--code-bg); padding: 1px 4px; border-radius: 3px; font-size: 11px; }
-  .msg-bubble pre code { background: none; padding: 0; }
-  /* system / info */
-  .msg.info .msg-bubble { background: none; border: none; color: var(--dim); font-size: 11px; font-style: italic; max-width: 100%; }
-  /* cursor blink */
-  .cursor::after { content: '▋'; animation: blink .7s step-end infinite; }
-  @keyframes blink { 50% { opacity: 0; } }
-
-  /* ── input area ── */
-  #input-area {
-    padding: 10px 14px; border-top: 1px solid var(--border);
-    background: var(--bg2); display: flex; gap: 8px; align-items: flex-end;
-  }
-  #user-input {
-    flex: 1; resize: none; min-height: 36px; max-height: 140px;
-    overflow-y: auto; padding: 8px 11px;
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: var(--radius); color: var(--text);
-    font-family: inherit; font-size: 13px; line-height: 1.4; outline: none;
-  }
-  #user-input:focus { border-color: var(--accent); }
-  #send-btn {
-    width: 36px; height: 36px; border-radius: var(--radius);
-    background: var(--accent); border: none; color: #fff;
-    cursor: pointer; font-size: 15px; flex-shrink: 0;
-    transition: background .15s;
-  }
-  #send-btn:hover { background: var(--accent2); }
-  #send-btn:disabled { opacity: .4; cursor: default; }
-
-  /* ── scrollbar ── */
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  /* ── mobile ── */
-  @media (max-width: 640px) {
-    #menu-btn { display: block; }
-    #sidebar { position: absolute; height: calc(100% - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); transform: translateX(calc(-1 * var(--sidebar))); }
-    #sidebar.open { transform: translateX(0); }
-    #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 40; }
-    #overlay.show { display: block; }
-    .msg-bubble { max-width: 88%; }
-  }
+  #sidebar.open { transform: translateX(0); }
+  #sb-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 40; }
+  #sb-overlay.show { display: block; }
+  .msg-bubble { max-width: 90%; }
+  #topbar-model { max-width: 100px; }
+}
 </style>
 </head>
 <body>
-<div id="overlay" onclick="closeSidebar()"></div>
+
+<!-- sidebar overlay (mobile) -->
+<div id="sb-overlay" onclick="closeSidebar()"></div>
+
 <div id="app">
 
-  <!-- sidebar -->
-  <div id="sidebar">
-    <div class="sb-section">
-      <div class="sb-label">model</div>
-      <select id="model-select" onchange="onModelChange()"><option>loading…</option></select>
-      <div class="btn-row">
-        <button class="btn" onclick="loadModels()">↻ refresh</button>
-      </div>
+<!-- ── sidebar ─────────────────────────────────── -->
+<div id="sidebar">
+  <div class="sb-section">
+    <div class="sb-label">provider</div>
+    <div id="provider-pills">
+      <div class="pill active" id="pill-unrestricted" onclick="setProvider('unrestricted')">unrestricted</div>
+      <div class="pill nvidia"  id="pill-nvidia"       onclick="setProvider('nvidia')">nvidia</div>
+      <div class="pill"         id="pill-custom"        onclick="setProvider('custom')">custom</div>
     </div>
-    <div class="sb-section">
-      <div class="sb-label">system prompt</div>
-      <textarea id="system-input" placeholder="(none)"></textarea>
-    </div>
-    <div class="sb-section">
-      <div class="sb-label">sessions</div>
-      <div class="btn-row">
-        <button class="btn" onclick="saveSession()">save</button>
-        <button class="btn" onclick="loadSessionList()">↻ list</button>
-      </div>
-      <div id="session-list"></div>
-    </div>
-    <div id="gh-panel">
-      <div class="sb-label">github</div>
-      <div class="gh-btn-grid">
-        <button class="btn" onclick="ghCmd('/user')">me</button>
-        <button class="btn" onclick="ghCmd('/user/repos?sort=updated&per_page=10')">repos</button>
-        <button class="btn" onclick="ghCmdInput('issues')">issues</button>
-        <button class="btn" onclick="ghCmdInput('prs')">PRs</button>
-        <button class="btn" onclick="ghCmdInput('branches')">branches</button>
-        <button class="btn" onclick="ghCmdInput('commits')">commits</button>
-        <button class="btn" onclick="ghCmdInput('file')">file</button>
-        <button class="btn" onclick="ghCmdInput('inject')">inject</button>
-      </div>
-      <input id="gh-input" type="text" placeholder="owner/repo [path]" />
-      <pre id="gh-output">ready</pre>
+    <select id="model-select" onchange="onModelChange()"><option>loading…</option></select>
+    <div class="btn-row">
+      <button class="btn" onclick="loadModels()">↻ models</button>
     </div>
   </div>
 
-  <!-- main -->
-  <div id="main">
-    <div id="topbar">
-      <button id="menu-btn" onclick="toggleSidebar()">☰</button>
-      <span id="topbar-title">hollow</span>
-      <span id="topbar-model"></span>
-      <span id="stream-badge" class="on">stream on</span>
-      <button id="clear-btn" onclick="clearChat()" title="clear history">✕ clear</button>
+  <div class="sb-section">
+    <div class="sb-label">system prompt</div>
+    <textarea id="system-input" placeholder="(none)"></textarea>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">sessions</div>
+    <div class="btn-row">
+      <button class="btn" onclick="saveSession()">save</button>
+      <button class="btn" onclick="loadSessionList()">↻ list</button>
     </div>
-    <div id="messages"></div>
-    <div id="input-area">
-      <textarea id="user-input" rows="1" placeholder="message… (Enter send, Shift+Enter newline)"></textarea>
-      <button id="send-btn" onclick="sendMessage()">↑</button>
+    <div id="session-list"></div>
+  </div>
+
+  <div id="gh-panel">
+    <div class="sb-label">github</div>
+    <div class="gh-btn-grid">
+      <button class="btn" onclick="ghCmd('/user')">me</button>
+      <button class="btn" onclick="ghCmd('/user/repos?sort=updated&per_page=10')">repos</button>
+      <button class="btn" onclick="ghCmdInput('issues')">issues</button>
+      <button class="btn" onclick="ghCmdInput('prs')">PRs</button>
+      <button class="btn" onclick="ghCmdInput('branches')">branches</button>
+      <button class="btn" onclick="ghCmdInput('commits')">commits</button>
+      <button class="btn" onclick="ghCmdInput('file')">file</button>
+      <button class="btn" onclick="ghCmdInput('inject')">inject</button>
     </div>
+    <input id="gh-input" type="text" placeholder="owner/repo [path]" />
+    <pre id="gh-output">ready</pre>
   </div>
 </div>
 
+<!-- ── main ───────────────────────────────────────── -->
+<div id="main">
+  <div id="topbar">
+    <button id="menu-btn" onclick="toggleSidebar()">☰</button>
+    <span id="topbar-title">hollow</span>
+    <span id="topbar-provider">unrestricted</span>
+    <span id="topbar-model"></span>
+    <span id="stream-badge" class="on" onclick="toggleStream()">stream on</span>
+    <button id="settings-btn" onclick="openSettings()" title="settings">⚙</button>
+    <button id="clear-btn"    onclick="clearChat()"    title="clear">✕</button>
+  </div>
+  <div id="messages"></div>
+  <div id="input-area">
+    <textarea id="user-input" rows="1" placeholder="message… (Enter send, Shift+Enter newline)"></textarea>
+    <button id="send-btn" onclick="sendMessage()">↑</button>
+  </div>
+</div>
+</div>
+
+<!-- ── settings modal ─────────────────────────────── -->
+<div id="settings-overlay" onclick="overlayClose(event)">
+<div id="settings-modal">
+  <h2>⚙ settings</h2>
+  <div class="settings-body">
+
+    <div class="field-group">
+      <div class="field-label">provider</div>
+      <div id="provider-pills-modal" style="display:flex;gap:5px;">
+        <div class="pill active" id="mpill-unrestricted" onclick="setProvider('unrestricted')">unrestricted.sh</div>
+        <div class="pill nvidia"  id="mpill-nvidia"       onclick="setProvider('nvidia')">nvidia nim</div>
+        <div class="pill"         id="mpill-custom"        onclick="setProvider('custom')">custom</div>
+      </div>
+    </div>
+
+    <hr class="settings-divider">
+
+    <div class="field-group">
+      <div class="field-label">api base url</div>
+      <input type="text" id="cfg-base" placeholder="https://api.unrestricted.sh/v1" />
+      <div class="field-desc">auto-fills on provider select. overrides env HOLLOW_BASE.</div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">api key <span id="apikey-status"></span></div>
+      <input type="text" id="cfg-apikey" placeholder="your api key" autocomplete="off" />
+      <div class="field-desc">stored in localStorage only. sent to your own /api/chat proxy, never to a third party directly.</div>
+    </div>
+
+    <hr class="settings-divider">
+
+    <div class="nvidia-section">
+      <div class="sb-label" style="color:var(--nvidia);margin-bottom:8px;">▸ nvidia nim</div>
+      <div class="field-group">
+        <div class="field-label">nvidia api key <span id="nvidia-status"></span></div>
+        <input type="text" id="cfg-nvidia-key" placeholder="nvapi-…" autocomplete="off" />
+        <div class="field-desc">get one at build.nvidia.com — free tier available.</div>
+      </div>
+      <div class="field-label" style="margin-top:10px;margin-bottom:4px;">quick-pick models</div>
+      <div class="nvidia-models-list">
+        <div class="nvidia-model-pill" onclick="pickNvidiaModel('meta/llama-3.1-405b-instruct')">meta/llama-3.1-405b-instruct</div>
+        <div class="nvidia-model-pill" onclick="pickNvidiaModel('nvidia/llama-3.1-nemotron-70b-instruct')">nvidia/llama-3.1-nemotron-70b-instruct</div>
+        <div class="nvidia-model-pill" onclick="pickNvidiaModel('mistralai/mixtral-8x22b-instruct-v0.1')">mistralai/mixtral-8x22b-instruct-v0.1</div>
+        <div class="nvidia-model-pill" onclick="pickNvidiaModel('google/gemma-2-27b-it')">google/gemma-2-27b-it</div>
+        <div class="nvidia-model-pill" onclick="pickNvidiaModel('deepseek-ai/deepseek-r1')">deepseek-ai/deepseek-r1</div>
+        <div class="nvidia-model-pill" onclick="pickNvidiaModel('nvidia/mistral-nemo-minitron-8b-8k-instruct')">nvidia/mistral-nemo-minitron-8b</div>
+      </div>
+    </div>
+
+    <hr class="settings-divider">
+
+    <div class="field-group">
+      <div class="field-label">github token <span id="gh-status"></span></div>
+      <input type="text" id="cfg-gh" placeholder="ghp_…" autocomplete="off" />
+      <div class="field-desc">needed for private repos and higher rate limits. stored in localStorage.</div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">default model</div>
+      <input type="text" id="cfg-model" placeholder="deepseek-v4.1-flash-uncensored" />
+    </div>
+
+  </div>
+  <div class="settings-footer">
+    <button class="btn" onclick="closeSettings()">cancel</button>
+    <button class="btn accent" onclick="saveSettings()">save</button>
+  </div>
+</div>
+</div>
+
 <script>
-// ── state ───────────────────────────────────────────────────────────────────
-const S = {
-  model:   localStorage.getItem('hollow_model')  || 'deepseek-v4.1-flash-uncensored',
-  system:  localStorage.getItem('hollow_system') || '',
-  msgs:    JSON.parse(localStorage.getItem('hollow_msgs') || '[]'),
-  stream:  localStorage.getItem('hollow_stream') !== 'false',
-  busy:    false,
+// ── config defaults ────────────────────────────────────────────────────────
+const PROVIDERS = {
+  unrestricted: { base: 'https://api.unrestricted.sh/v1', label: 'unrestricted' },
+  nvidia:       { base: 'https://integrate.api.nvidia.com/v1', label: 'nvidia nim' },
+  custom:       { base: '', label: 'custom' },
 };
 
-// ── boot ────────────────────────────────────────────────────────────────────
+const S = {
+  provider: localStorage.getItem('hollow_provider') || 'unrestricted',
+  base:     localStorage.getItem('hollow_base')     || PROVIDERS.unrestricted.base,
+  apiKey:   localStorage.getItem('hollow_apikey')   || '',
+  nvidiaKey:localStorage.getItem('hollow_nvidiakey')|| '',
+  ghToken:  localStorage.getItem('hollow_ghtoken')  || '',
+  model:    localStorage.getItem('hollow_model')    || 'deepseek-v4.1-flash-uncensored',
+  system:   localStorage.getItem('hollow_system')   || '',
+  msgs:     JSON.parse(localStorage.getItem('hollow_msgs') || '[]'),
+  stream:   localStorage.getItem('hollow_stream') !== 'false',
+  busy:     false,
+};
+
+function activeKey() {
+  return S.provider === 'nvidia' ? S.nvidiaKey : S.apiKey;
+}
+
+// ── boot ──────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('system-input').value = S.system;
   document.getElementById('topbar-model').textContent = S.model;
   updateStreamBadge();
+  applyProvider(S.provider, false);
   loadModels();
   renderHistory();
   loadSessionList();
   autoResize(document.getElementById('user-input'));
 });
 
-// ── models ──────────────────────────────────────────────────────────────────
+// ── provider ──────────────────────────────────────────────────────────────
+function setProvider(p, fromModal = true) {
+  S.provider = p;
+  localStorage.setItem('hollow_provider', p);
+  applyProvider(p, fromModal);
+}
+
+function applyProvider(p, updateModel = true) {
+  ['unrestricted','nvidia','custom'].forEach(id => {
+    document.getElementById(`pill-${id}`)?.classList.toggle('active', id === p);
+    document.getElementById(`mpill-${id}`)?.classList.toggle('active', id === p);
+  });
+  const badge = document.getElementById('topbar-provider');
+  badge.textContent = PROVIDERS[p]?.label || p;
+  badge.className = p === 'nvidia' ? 'nvidia' : '';
+  document.getElementById('messages').classList.toggle('nvidia-mode', p === 'nvidia');
+  if (p !== 'custom') {
+    S.base = PROVIDERS[p].base;
+    localStorage.setItem('hollow_base', S.base);
+    document.getElementById('cfg-base').value = S.base;
+  }
+  if (updateModel && p === 'nvidia') {
+    S.model = 'meta/llama-3.1-405b-instruct';
+    localStorage.setItem('hollow_model', S.model);
+    document.getElementById('topbar-model').textContent = S.model;
+    document.getElementById('cfg-model').value = S.model;
+  }
+  loadModels();
+}
+
+function pickNvidiaModel(m) {
+  setProvider('nvidia', false);
+  S.model = m;
+  localStorage.setItem('hollow_model', m);
+  document.getElementById('topbar-model').textContent = m;
+  document.getElementById('cfg-model').value = m;
+  document.getElementById('model-select').value = m;
+  appendBubble('info', `model → ${m}`);
+}
+
+// ── models ────────────────────────────────────────────────────────────────
 async function loadModels() {
   const sel = document.getElementById('model-select');
   sel.innerHTML = '<option>loading…</option>';
   try {
-    const r = await fetch('/api/models');
+    const r = await fetch('/api/models', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: activeKey(), baseUrl: S.base }),
+    });
     const d = await r.json();
     if (d.error) throw new Error(d.error);
     sel.innerHTML = '';
@@ -256,12 +459,12 @@ async function loadModels() {
       if (m === S.model) o.selected = true;
       sel.appendChild(o);
     }
-    if (!d.models.includes(S.model)) {
+    if (![...sel.options].some(o => o.value === S.model)) {
       const o = document.createElement('option');
       o.value = S.model; o.textContent = S.model; o.selected = true;
       sel.prepend(o);
     }
-  } catch(e) {
+  } catch {
     sel.innerHTML = `<option value="${S.model}">${S.model}</option>`;
   }
 }
@@ -272,44 +475,82 @@ function onModelChange() {
   document.getElementById('topbar-model').textContent = S.model;
 }
 
-// ── sidebar ──────────────────────────────────────────────────────────────────
+// ── sidebar ───────────────────────────────────────────────────────────────
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('overlay').classList.toggle('show');
+  document.getElementById('sb-overlay').classList.toggle('show');
 }
 function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('sb-overlay').classList.remove('show');
 }
 
-// ── stream toggle ─────────────────────────────────────────────────────────────
-document.getElementById('stream-badge').addEventListener('click', () => {
-  S.stream = !S.stream;
-  localStorage.setItem('hollow_stream', S.stream);
-  updateStreamBadge();
-});
+// ── stream ────────────────────────────────────────────────────────────────
+function toggleStream() { S.stream=!S.stream; localStorage.setItem('hollow_stream',S.stream); updateStreamBadge(); }
 function updateStreamBadge() {
   const b = document.getElementById('stream-badge');
   b.textContent = S.stream ? 'stream on' : 'stream off';
-  b.className = S.stream ? 'on' : '';
+  b.className   = S.stream ? 'on' : '';
 }
 
-// ── messages ─────────────────────────────────────────────────────────────────
+// ── settings modal ────────────────────────────────────────────────────────
+function openSettings() {
+  document.getElementById('cfg-base').value      = S.base;
+  document.getElementById('cfg-apikey').value    = S.apiKey;
+  document.getElementById('cfg-nvidia-key').value= S.nvidiaKey;
+  document.getElementById('cfg-gh').value        = S.ghToken;
+  document.getElementById('cfg-model').value     = S.model;
+  updateKeyStatuses();
+  document.getElementById('settings-overlay').classList.add('open');
+}
+function closeSettings() {
+  document.getElementById('settings-overlay').classList.remove('open');
+}
+function overlayClose(e) {
+  if (e.target === document.getElementById('settings-overlay')) closeSettings();
+}
+function saveSettings() {
+  S.base      = document.getElementById('cfg-base').value.trim()      || S.base;
+  S.apiKey    = document.getElementById('cfg-apikey').value.trim();
+  S.nvidiaKey = document.getElementById('cfg-nvidia-key').value.trim();
+  S.ghToken   = document.getElementById('cfg-gh').value.trim();
+  const nm    = document.getElementById('cfg-model').value.trim();
+  if (nm) { S.model = nm; document.getElementById('topbar-model').textContent = nm; }
+  localStorage.setItem('hollow_base',      S.base);
+  localStorage.setItem('hollow_apikey',    S.apiKey);
+  localStorage.setItem('hollow_nvidiakey', S.nvidiaKey);
+  localStorage.setItem('hollow_ghtoken',   S.ghToken);
+  localStorage.setItem('hollow_model',     S.model);
+  updateKeyStatuses();
+  closeSettings();
+  loadModels();
+  appendBubble('info', 'settings saved');
+}
+function updateKeyStatuses() {
+  const badge = (id, val) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = `key-status ${val ? 'set' : 'unset'}`;
+    el.textContent = val ? '● set' : '○ not set';
+  };
+  badge('apikey-status',  S.apiKey);
+  badge('nvidia-status',  S.nvidiaKey);
+  badge('gh-status',      S.ghToken);
+}
+
+// ── messages ──────────────────────────────────────────────────────────────
 function renderHistory() {
-  const c = document.getElementById('messages');
-  c.innerHTML = '';
+  document.getElementById('messages').innerHTML = '';
   for (const m of S.msgs) appendBubble(m.role, m.content);
   scrollBottom();
 }
-
-function appendBubble(role, content, streaming = false) {
+function appendBubble(role, content, streaming=false) {
   const c = document.getElementById('messages');
   const wrap = document.createElement('div');
   wrap.className = `msg ${role}`;
-  if (role === 'info') wrap.className = 'msg info';
   const av = document.createElement('div');
   av.className = 'msg-avatar';
-  av.textContent = role === 'user' ? 'P' : role === 'info' ? 'i' : '◆';
+  av.textContent = role==='user' ? 'P' : role==='info' ? 'i' : '◆';
   const bub = document.createElement('div');
   bub.className = 'msg-bubble' + (streaming ? ' cursor' : '');
   bub.innerHTML = renderContent(content);
@@ -319,54 +560,41 @@ function appendBubble(role, content, streaming = false) {
   scrollBottom();
   return bub;
 }
-
-function renderContent(text) {
-  // minimal markdown: code blocks, inline code, bold
-  return text
+function renderContent(t) {
+  return t
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/```([\s\S]*?)```/g, (_,c) => `<pre><code>${c.trim()}</code></pre>`)
-    .replace(/`([^`]+)`/g, (_,c) => `<code>${c}</code>`)
-    .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
-    .replace(/\n/g, '<br>');
+    .replace(/```([\s\S]*?)```/g,(_,c)=>`<pre><code>${c.trim()}</code></pre>`)
+    .replace(/`([^`]+)`/g,(_,c)=>`<code>${c}</code>`)
+    .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')
+    .replace(/\n/g,'<br>');
 }
-
 function scrollBottom() {
   const c = document.getElementById('messages');
   c.scrollTop = c.scrollHeight;
 }
-
 function clearChat() {
-  S.msgs = [];
-  localStorage.removeItem('hollow_msgs');
-  document.getElementById('messages').innerHTML = '';
-  appendBubble('info', 'history cleared');
+  S.msgs=[]; localStorage.removeItem('hollow_msgs');
+  document.getElementById('messages').innerHTML='';
+  appendBubble('info','history cleared');
 }
 
-// ── send ──────────────────────────────────────────────────────────────────────
+// ── send ──────────────────────────────────────────────────────────────────
 document.getElementById('user-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
 
 async function sendMessage() {
   if (S.busy) return;
-  const inp = document.getElementById('user-input');
+  const inp  = document.getElementById('user-input');
   const text = inp.value.trim();
   if (!text) return;
-  inp.value = ''; inp.style.height = '';
-
-  // system prompt live update
+  inp.value=''; inp.style.height='';
   S.system = document.getElementById('system-input').value.trim();
   localStorage.setItem('hollow_system', S.system);
-
-  // local commands
-  if (text.startsWith('/')) {
-    if (handleLocalCmd(text)) return;
-  }
-
-  S.msgs.push({ role: 'user', content: text });
-  localStorage.setItem('hollow_msgs', JSON.stringify(S.msgs));
-  appendBubble('user', text);
-
+  if (text.startsWith('/') && handleLocalCmd(text)) return;
+  S.msgs.push({role:'user',content:text});
+  localStorage.setItem('hollow_msgs',JSON.stringify(S.msgs));
+  appendBubble('user',text);
   setBusy(true);
   if (S.stream) await streamResponse();
   else await fetchResponse();
@@ -374,198 +602,189 @@ async function sendMessage() {
 }
 
 function handleLocalCmd(cmd) {
-  const p = cmd.trim().split(/\s+/);
-  if (p[0] === '/clear') { clearChat(); return true; }
-  if (p[0] === '/model' && p[1]) { S.model = p[1]; localStorage.setItem('hollow_model',S.model); document.getElementById('topbar-model').textContent=S.model; appendBubble('info',`model → ${S.model}`); return true; }
-  if (p[0] === '/stream') { S.stream=!S.stream; localStorage.setItem('hollow_stream',S.stream); updateStreamBadge(); appendBubble('info',`stream ${S.stream?'on':'off'}`); return true; }
-  if (p[0] === '/save') { saveSession(); return true; }
-  if (p[0] === '/sessions') { loadSessionList(); appendBubble('info','session list refreshed in sidebar'); return true; }
-  if (p[0] === '/system') { const sys=p.slice(1).join(' '); S.system=sys; document.getElementById('system-input').value=sys; localStorage.setItem('hollow_system',sys); appendBubble('info',`system ${sys?'set':'cleared'}`); return true; }
-  if (p[0] === '/gh' && p[1]) { handleGhCmd(p.slice(1)); return true; }
-  if (p[0] === '/help') { appendBubble('info','commands: /clear /model <name> /stream /save /sessions /system <text> /gh me|repos|issues|prs|commits|branches|file|search|inject'); return true; }
+  const p=cmd.trim().split(/\s+/);
+  const c=p[0].toLowerCase();
+  if(c==='/clear'){clearChat();return true;}
+  if(c==='/help'){appendBubble('info','commands: /clear /model <name> /stream /save /sessions /system <text> /gh me|repos|issues|prs|commits|branches|file|search|inject');return true;}
+  if(c==='/model'&&p[1]){S.model=p[1];localStorage.setItem('hollow_model',S.model);document.getElementById('topbar-model').textContent=S.model;appendBubble('info',`model → ${S.model}`);return true;}
+  if(c==='/stream'){toggleStream();appendBubble('info',`stream ${S.stream?'on':'off'}`);return true;}
+  if(c==='/save'){saveSession();return true;}
+  if(c==='/sessions'){loadSessionList();appendBubble('info','session list refreshed');return true;}
+  if(c==='/system'){const s=p.slice(1).join(' ');S.system=s;document.getElementById('system-input').value=s;localStorage.setItem('hollow_system',s);appendBubble('info',`system ${s?'set':'cleared'}`);return true;}
+  if(c==='/settings'){openSettings();return true;}
+  if(c==='/gh'&&p[1]){handleGhCmd(p.slice(1));return true;}
   return false;
 }
 
 async function streamResponse() {
-  const bub = appendBubble('assistant', '', true);
-  let full = '';
+  const bub = appendBubble('assistant','',true);
+  let full='';
   try {
-    const resp = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: S.msgs, model: S.model, system: S.system }),
+    const resp = await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        messages: S.msgs,
+        model:    S.model,
+        system:   S.system,
+        apiKey:   activeKey(),
+        baseUrl:  S.base,
+      }),
     });
-    const reader = resp.body.getReader();
-    const dec = new TextDecoder();
-    let buf = '';
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buf += dec.decode(value, { stream: true });
-      const lines = buf.split('\n');
-      buf = lines.pop();
-      for (const line of lines) {
-        if (!line.startsWith('data: ')) continue;
-        const raw = line.slice(6).trim();
-        if (raw === '[DONE]') break;
-        try {
-          const d = JSON.parse(raw);
-          if (d.error) { full += `\n[error: ${d.error}]`; break; }
-          if (d.delta) { full += d.delta; bub.innerHTML = renderContent(full); scrollBottom(); }
-        } catch {}
+    const reader=resp.body.getReader();
+    const dec=new TextDecoder();
+    let buf='';
+    while(true){
+      const{done,value}=await reader.read();
+      if(done) break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split('\n'); buf=lines.pop();
+      for(const line of lines){
+        if(!line.startsWith('data: ')) continue;
+        const raw=line.slice(6).trim();
+        if(raw==='[DONE]') break;
+        try{
+          const d=JSON.parse(raw);
+          if(d.error){full+=`\n[error: ${d.error}]`;break;}
+          if(d.delta){full+=d.delta;bub.innerHTML=renderContent(full);scrollBottom();}
+        }catch{}
       }
     }
-  } catch(e) { full = `[error: ${e.message}]`; }
+  }catch(e){full=`[error: ${e.message}]`;}
   bub.classList.remove('cursor');
-  bub.innerHTML = renderContent(full);
-  S.msgs.push({ role: 'assistant', content: full });
-  localStorage.setItem('hollow_msgs', JSON.stringify(S.msgs));
+  bub.innerHTML=renderContent(full);
+  S.msgs.push({role:'assistant',content:full});
+  localStorage.setItem('hollow_msgs',JSON.stringify(S.msgs));
 }
 
-async function fetchResponse() {
-  appendBubble('info', '…');
-  try {
-    const r = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: S.msgs, model: S.model, system: S.system, stream: false }),
+async function fetchResponse(){
+  const info=appendBubble('info','…');
+  try{
+    const r=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({messages:S.msgs,model:S.model,system:S.system,apiKey:activeKey(),baseUrl:S.base}),
     });
-    const d = await r.json();
-    const text = d.choices?.[0]?.message?.content || d.error || '[no response]';
-    document.getElementById('messages').lastChild.remove();
-    appendBubble('assistant', text);
-    S.msgs.push({ role: 'assistant', content: text });
-    localStorage.setItem('hollow_msgs', JSON.stringify(S.msgs));
-  } catch(e) {
-    document.getElementById('messages').lastChild.remove();
-    appendBubble('info', `error: ${e.message}`);
+    const d=await r.json();
+    const text=d.choices?.[0]?.message?.content||d.error||'[no response]';
+    info.closest('.msg').remove();
+    appendBubble('assistant',text);
+    S.msgs.push({role:'assistant',content:text});
+    localStorage.setItem('hollow_msgs',JSON.stringify(S.msgs));
+  }catch(e){
+    info.closest('.msg').remove();
+    appendBubble('info',`error: ${e.message}`);
   }
 }
 
-function setBusy(v) {
-  S.busy = v;
-  document.getElementById('send-btn').disabled = v;
-  document.getElementById('user-input').disabled = v;
+function setBusy(v){
+  S.busy=v;
+  document.getElementById('send-btn').disabled=v;
+  document.getElementById('user-input').disabled=v;
 }
 
-// ── sessions ──────────────────────────────────────────────────────────────────
-function saveSession() {
-  const name = new Date().toISOString().slice(0,16).replace('T','_').replace(':','');
-  const all = JSON.parse(localStorage.getItem('hollow_session_index') || '[]');
-  all.unshift(name);
-  localStorage.setItem('hollow_session_index', JSON.stringify(all.slice(0,30)));
-  localStorage.setItem(`hollow_sess_${name}`, JSON.stringify({ model: S.model, system: S.system, msgs: S.msgs }));
-  loadSessionList();
-  appendBubble('info', `saved: ${name}`);
+// ── sessions ──────────────────────────────────────────────────────────────
+function saveSession(){
+  const name=new Date().toISOString().slice(0,16).replace('T','_').replace(':','');
+  const all=JSON.parse(localStorage.getItem('hollow_session_index')||'[]');
+  all.unshift(name); localStorage.setItem('hollow_session_index',JSON.stringify(all.slice(0,30)));
+  localStorage.setItem(`hollow_sess_${name}`,JSON.stringify({model:S.model,system:S.system,msgs:S.msgs,provider:S.provider,base:S.base}));
+  loadSessionList(); appendBubble('info',`saved: ${name}`);
 }
-
-function loadSessionList() {
-  const list = document.getElementById('session-list');
-  const all = JSON.parse(localStorage.getItem('hollow_session_index') || '[]');
-  list.innerHTML = '';
-  for (const n of all.slice(0,15)) {
-    const d = document.createElement('div');
-    d.className = 'session-item';
-    d.textContent = n;
-    d.onclick = () => restoreSession(n);
+function loadSessionList(){
+  const list=document.getElementById('session-list');
+  const all=JSON.parse(localStorage.getItem('hollow_session_index')||'[]');
+  list.innerHTML='';
+  for(const n of all.slice(0,15)){
+    const d=document.createElement('div');
+    d.className='session-item'; d.textContent=n;
+    d.onclick=()=>restoreSession(n);
     list.appendChild(d);
   }
 }
-
-function restoreSession(name) {
-  const raw = localStorage.getItem(`hollow_sess_${name}`);
-  if (!raw) return;
-  const d = JSON.parse(raw);
-  S.model = d.model; S.system = d.system; S.msgs = d.msgs;
-  document.getElementById('system-input').value = S.system;
-  document.getElementById('topbar-model').textContent = S.model;
-  localStorage.setItem('hollow_model', S.model);
-  localStorage.setItem('hollow_system', S.system);
-  localStorage.setItem('hollow_msgs', JSON.stringify(S.msgs));
+function restoreSession(name){
+  const raw=localStorage.getItem(`hollow_sess_${name}`);
+  if(!raw) return;
+  const d=JSON.parse(raw);
+  S.model=d.model; S.system=d.system; S.msgs=d.msgs;
+  if(d.provider) setProvider(d.provider,false);
+  if(d.base){S.base=d.base;localStorage.setItem('hollow_base',S.base);}
+  document.getElementById('system-input').value=S.system;
+  document.getElementById('topbar-model').textContent=S.model;
+  localStorage.setItem('hollow_model',S.model);
+  localStorage.setItem('hollow_system',S.system);
+  localStorage.setItem('hollow_msgs',JSON.stringify(S.msgs));
   renderHistory();
-  appendBubble('info', `loaded: ${name} (${S.msgs.length/2|0} turns)`);
+  appendBubble('info',`loaded: ${name} (${S.msgs.length/2|0} turns)`);
   closeSidebar();
 }
 
-// ── github ───────────────────────────────────────────────────────────────────
-async function ghApi(path, method='GET', payload=null) {
-  const r = await fetch('/api/github', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path, method, payload }),
+// ── github ────────────────────────────────────────────────────────────────
+async function ghApi(path,method='GET',payload=null){
+  const r=await fetch('/api/github',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({path,method,payload,ghToken:S.ghToken}),
   });
   return r.json();
 }
-
-async function ghCmd(path) {
-  const out = document.getElementById('gh-output');
-  out.textContent = 'loading…';
-  try {
-    const d = await ghApi(path);
-    if (Array.isArray(d)) {
-      out.textContent = d.map(r => r.full_name || r.name || r.login || JSON.stringify(r)).join('\n');
-    } else {
-      out.textContent = JSON.stringify(d, null, 2).slice(0, 1200);
-    }
-  } catch(e) { out.textContent = `error: ${e.message}`; }
+async function ghCmd(path){
+  const out=document.getElementById('gh-output');
+  out.textContent='loading…';
+  try{
+    const d=await ghApi(path);
+    if(Array.isArray(d)){
+      out.textContent=d.map(r=>r.full_name||r.name||r.login||JSON.stringify(r)).join('\n');
+    } else { out.textContent=JSON.stringify(d,null,2).slice(0,1200); }
+  }catch(e){out.textContent=`error: ${e.message}`;}
 }
-
-async function ghCmdInput(type) {
-  const inp = document.getElementById('gh-input').value.trim();
-  const parts = inp.split(/\s+/);
-  const repo = parts[0]; const path = parts[1] || '';
-  const out = document.getElementById('gh-output');
-  out.textContent = 'loading…';
-  try {
+async function ghCmdInput(type){
+  const val=document.getElementById('gh-input').value.trim();
+  const parts=val.split(/\s+/);
+  const repo=parts[0]; const path=parts[1]||'';
+  const out=document.getElementById('gh-output');
+  out.textContent='loading…';
+  try{
     let data;
-    if (type === 'issues')   data = await ghApi(`/repos/${repo}/issues?state=open&per_page=10`);
-    if (type === 'prs')      data = await ghApi(`/repos/${repo}/pulls?state=open&per_page=10`);
-    if (type === 'branches') data = await ghApi(`/repos/${repo}/branches`);
-    if (type === 'commits')  data = await ghApi(`/repos/${repo}/commits?per_page=8`);
-    if (type === 'file')     data = await ghApi(`/repos/${repo}/contents/${path}`);
-    if (type === 'inject') {
-      data = await ghApi(`/repos/${repo}/contents/${path}`);
-      let content = '';
-      if (Array.isArray(data)) {
-        content = data.map(f => f.name).join('\n');
-      } else {
-        content = atob(data.content.replace(/\n/g,''));
-        content = content.slice(0, 4000);
-      }
-      const msg = `[injected: ${repo}/${path}]\n\`\`\`\n${content}\n\`\`\``;
-      S.msgs.push({ role: 'user', content: msg });
-      localStorage.setItem('hollow_msgs', JSON.stringify(S.msgs));
-      appendBubble('user', msg);
-      out.textContent = `injected ${repo}/${path} into context`;
+    if(type==='issues')   data=await ghApi(`/repos/${repo}/issues?state=open&per_page=10`);
+    if(type==='prs')      data=await ghApi(`/repos/${repo}/pulls?state=open&per_page=10`);
+    if(type==='branches') data=await ghApi(`/repos/${repo}/branches`);
+    if(type==='commits')  data=await ghApi(`/repos/${repo}/commits?per_page=8`);
+    if(type==='file')     data=await ghApi(`/repos/${repo}/contents/${path}`);
+    if(type==='inject'){
+      data=await ghApi(`/repos/${repo}/contents/${path}`);
+      let content='';
+      if(Array.isArray(data)){content=data.map(f=>f.name).join('\n');}
+      else{content=atob(data.content.replace(/\n/g,'')).slice(0,4000);}
+      const msg=`[injected: ${repo}/${path}]\n\`\`\`\n${content}\n\`\`\``;
+      S.msgs.push({role:'user',content:msg});
+      localStorage.setItem('hollow_msgs',JSON.stringify(S.msgs));
+      appendBubble('user',msg);
+      out.textContent=`injected ${repo}/${path} → context`;
       return;
     }
-    if (Array.isArray(data)) {
-      out.textContent = data.filter(i => !i.pull_request)
-        .map(i => `#${i.number || ''} ${i.title || i.name || i.sha?.slice(0,7) || i.login || ''}`).join('\n').slice(0,1000);
-    } else {
-      out.textContent = JSON.stringify(data, null, 2).slice(0, 1200);
-    }
-  } catch(e) { out.textContent = `error: ${e.message}`; }
+    if(Array.isArray(data)){
+      out.textContent=data.filter(i=>!i.pull_request)
+        .map(i=>`${i.number?'#'+i.number+' ':''}${i.title||i.name||i.sha?.slice(0,7)||i.login||''}`)
+        .join('\n').slice(0,1000);
+    } else {out.textContent=JSON.stringify(data,null,2).slice(0,1200);}
+  }catch(e){out.textContent=`error: ${e.message}`;}
+}
+async function handleGhCmd(parts){
+  const sub=parts[0].toLowerCase();
+  const a1=parts[1]||'';
+  if(sub==='me')    await ghCmd('/user');
+  else if(sub==='repos') await ghCmd('/user/repos?sort=updated&per_page=10');
+  else if(sub==='issues'&&a1) await ghCmdInput('issues');
+  else if(sub==='prs'&&a1)    await ghCmdInput('prs');
+  appendBubble('info',`gh ${sub} → sidebar`);
 }
 
-async function handleGhCmd(parts) {
-  const sub = parts[0].toLowerCase();
-  const a1 = parts[1] || ''; const a2 = parts[2] || '';
-  const out = document.getElementById('gh-output');
-  out.textContent = 'loading…';
-  if (sub==='me') await ghCmd('/user');
-  else if (sub==='repos') await ghCmd('/user/repos?sort=updated&per_page=10');
-  else if (sub==='issues' && a1) await ghCmdByType('issues',a1,a2);
-  else if (sub==='prs' && a1) await ghCmdByType('prs',a1,a2);
-  else { out.textContent = `gh: unhandled ${sub}`; }
-  appendBubble('info', `gh ${sub} → see sidebar`);
-}
-
-// ── auto-resize textarea ─────────────────────────────────────────────────────
-function autoResize(el) {
-  el.addEventListener('input', () => {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+// ── auto-resize ───────────────────────────────────────────────────────────
+function autoResize(el){
+  el.addEventListener('input',()=>{
+    el.style.height='auto';
+    el.style.height=Math.min(el.scrollHeight,140)+'px';
   });
 }
 </script>

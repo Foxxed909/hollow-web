@@ -1,27 +1,35 @@
 # hollow-web
 
-Web chat interface + Termux CLI for unrestricted.sh (or any OpenAI-compatible API). One-click Vercel deploy.
+Web chat + Termux CLI for unrestricted.sh, Nvidia NIM, or any OpenAI-compatible API. Settings (API keys, provider, model) are configured inside the app — nothing hardcoded.
 
 ## deploy to Vercel
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Foxxed909/hollow-web)
 
-Set these environment variables in your Vercel project settings:
+After deploy, **no env vars required** — set everything in the in-app settings panel (⚙ icon). Or optionally set env vars as fallbacks:
 
-| var | value |
+| var | default |
 |---|---|
 | `HOLLOW_BASE` | `https://api.unrestricted.sh/v1` |
-| `HOLLOW_KEY` | your API key |
+| `HOLLOW_KEY` | — |
 | `HOLLOW_MODEL` | `deepseek-v4.1-flash-uncensored` |
-| `GITHUB_TOKEN` | your GH PAT (for private repo access) |
+| `GITHUB_TOKEN` | — |
 
 ## local dev
 
 ```bash
 npm i -g vercel
-cp .env.example .env.local   # fill in your keys
-vercel dev                    # runs on localhost:3000
+vercel dev    # localhost:3000
+# set keys in-app via ⚙ settings
 ```
+
+## providers
+
+| provider | base url | notes |
+|---|---|---|
+| unrestricted.sh | `https://api.unrestricted.sh/v1` | uncensored models |
+| nvidia nim | `https://integrate.api.nvidia.com/v1` | free tier at build.nvidia.com |
+| custom | any OpenAI-compatible URL | bring your own |
 
 ## termux CLI
 
@@ -33,20 +41,16 @@ export HOLLOW_MODEL=deepseek-v4.1-flash-uncensored
 python cli/hollow.py
 ```
 
-## commands
+## slash commands
 
 ```
-/help          full command list
-/model <name>  switch model mid-session
-/models        list available from API
-/system <text> set system prompt
-/clear         wipe history
-/stream        toggle streaming
-/save          save session
-/load <name>   restore session
-/gh me         github user info
-/gh repos      your repos
-/gh issues <owner/repo>
-/gh prs    <owner/repo>
-/gh inject <owner/repo> <path>   push file into context
+/help
+/model <name>     switch model
+/models           list from API
+/system <text>    set system prompt
+/clear            wipe history
+/stream           toggle streaming
+/save / /sessions
+/settings         open settings panel
+/gh me|repos|issues|prs|commits|branches|file|search|inject
 ```
